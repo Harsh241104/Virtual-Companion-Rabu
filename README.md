@@ -82,7 +82,9 @@ PowerShell terminal, **Ctrl+C** in that terminal also stops the application.
 |       |-- rabu.glb             # The companion's only character model
 |       `-- rabu-preview.png     # Rendered image shown in this README
 |-- tests/
-|   `-- test_character_view.py
+|   |-- test_character_view.py
+|   `-- test_reminders.py          # SQLite persistence and reminder queries
+|-- data/                          # Local-only SQLite and WebEngine data (gitignored)
 |-- pyproject.toml               # Package metadata and dependencies
 |-- requirements.txt             # Editable install for local development
 └-- README.md
