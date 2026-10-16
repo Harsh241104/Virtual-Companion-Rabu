@@ -74,7 +74,8 @@ PowerShell terminal, **Ctrl+C** in that terminal also stops the application.
 |   |-- __main__.py              # `python -m rabu_companion` entry point
 |   |-- character_view.py        # Transparent embedded 3D view and greeting bridge
 |   |-- emotions.py              # Reminder-to-emotion rules
-|   |-- reminders.py             # In-memory reminder data and queries
+|   |-- reminders.py             # SQLite-backed reminder data and queries
+|   |-- storage.py               # E-drive data-directory configuration
 |   |-- speech.py                # Background text-to-speech
 |   |-- window.py                # Frameless desktop UI and interactions
 |   `-- assets/
@@ -87,6 +88,26 @@ PowerShell terminal, **Ctrl+C** in that terminal also stops the application.
 └-- README.md
 ```
 
+## Rabu data location and backup
+
+By default, application data is stored in the project's `data` directory.
+For this installation, moving the project to `E:\Rabu` makes the database
+`E:\Rabu\data\rabu.sqlite3`; the Qt WebEngine cache and storage are kept under
+`E:\Rabu\data\webengine`. The `data` directory is excluded from Git so
+personal reminders and browser data are not pushed to the public repository.
+
+To use a different data directory, set `RABU_DATA_DIR` before starting Rabu:
+
+```powershell
+$env:RABU_DATA_DIR = 'E:\Rabu\data'
+.\.venv\Scripts\python.exe -m rabu_companion
+```
+
+Reminders, their scheduled times, and completion times are stored in SQLite
+and survive closing or restarting the app. Back up `data\rabu.sqlite3` with
+the app closed. The database contains reminders only; temporary render/build
+outputs and installed Python environments are not treated as personal data.
+
 ## How the character is displayed
 
 - `__main__.py` configures Qt high-DPI and shared OpenGL contexts before
@@ -98,7 +119,7 @@ PowerShell terminal, **Ctrl+C** in that terminal also stops the application.
   `<model-viewer>` version 1.12.0 from unpkg, and embeds the local GLB into
   the page. The Qt WebChannel connects character clicks back to the greeting
   in the Python application.
-- `reminders.py` stores reminders in memory and provides due, upcoming, and
+- `reminders.py` stores reminders in SQLite and provides due, upcoming, and
   recently completed queries.
 - `emotions.py` maps reminder state to calm, concerned, or happy.
 - `speech.py` runs `pyttsx3` in a background thread.
@@ -113,9 +134,9 @@ desktop behind Rabu.
   and pyttsx3.
 - The embedded viewer needs internet access to load `<model-viewer>` from
   unpkg. The character model itself is local and included in the package.
-- Reminders are one-time and kept in memory; they are lost when the app exits.
-- There is no calendar sync, persistent reminder storage, voice input, or AI
-  chat.
+- Reminders are one-time; they are stored in the SQLite database described
+  above.
+- There is no calendar sync, voice input, or AI chat.
 
 ## Tests
 

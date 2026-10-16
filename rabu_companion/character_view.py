@@ -8,9 +8,12 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtWebEngineWidgets import (
     QWebEnginePage,
+    QWebEngineProfile,
     QWebEngineView,
 )
 from PyQt5.QtWidgets import QWidget
+
+from .storage import get_data_dir
 
 
 CHARACTER_PAGE = """
@@ -123,6 +126,9 @@ class _CompanionBridge(QObject):
 
 
 class _CharacterPage(QWebEnginePage):
+    def __init__(self, profile: QWebEngineProfile, parent: QWidget):
+        super().__init__(profile, parent)
+
     def javaScriptConsoleMessage(
         self,
         level: QWebEnginePage.JavaScriptConsoleMessageLevel,
@@ -148,7 +154,15 @@ class CharacterView(QWebEngineView):
         self.setAttribute(Qt.WA_NoSystemBackground, True)
         self.setAutoFillBackground(False)
         self.setStyleSheet("background: transparent; border: none;")
-        self.setPage(_CharacterPage(self))
+        webengine_dir = get_data_dir() / "webengine"
+        cache_dir = webengine_dir / "cache"
+        storage_dir = webengine_dir / "storage"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        storage_dir.mkdir(parents=True, exist_ok=True)
+        self.profile = QWebEngineProfile("Rabu", self)
+        self.profile.setCachePath(str(cache_dir))
+        self.profile.setPersistentStoragePath(str(storage_dir))
+        self.setPage(_CharacterPage(self.profile, self))
         self.page().setBackgroundColor(QColor(0, 0, 0, 0))
         self.bridge = _CompanionBridge(self)
         self.channel = QWebChannel(self.page())
